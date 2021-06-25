@@ -18,7 +18,7 @@ class Frontdesk:
         self.car_dict = {}
 
 
-class Customer(Frontdesk):
+class Customer():
     username = None
     phone = None
 
@@ -35,7 +35,7 @@ class Manager():
     username, passkey = None, str(os.getenv('secret', 'secret'))
 
 
-class Admin(Frontdesk):
+class Admin():
 
     def __init__(self, IAM):
         self.IAM = IAM
@@ -114,7 +114,7 @@ class Admin(Frontdesk):
 
 
 if __name__ == "__main__":
-
+    frontdesk = Frontdesk()
     while True:
         try:
             choice = int(input("1.Manager login 2.User Login 3.Exit\n"))
