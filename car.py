@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import os
 import pprint
 from copy import deepcopy
+import threading
 pp = pprint.PrettyPrinter(indent=4)
 
 
@@ -41,6 +42,21 @@ class Frontdesk:
             i['duration'] = i['duration'].strftime(
                 '%d-%m-%Y %H:%M:%S')
         return item
+
+
+class Available_Maker:
+
+    def __init__(self, frontdesk) -> None:
+        self.frontdesk = frontdesk
+        if self.frontdesk.added_car:
+            t1 = threading.Thread(target=self.checker)
+            t1.start()
+
+    def checker(self):
+        while True:
+            for item in self.frontdesk.car_dict:
+                if self.frontdesk.car_dict[item]['duration'] < datetime.now():
+                    self.frontdesk.car_dict[item] = 'AVAILABLE'
 
 
 class Customer():
@@ -186,7 +202,6 @@ class Admin():
             except KeyError:
                 print('No car found corrosponding resgistration number\n')
             except:
-                raise
                 print("Try again\n")
         else:
             pp.pprint(self.frontdesk.formatter(self.frontdesk.car_dict))
@@ -215,7 +230,7 @@ if __name__ == "__main__":
                 while key != 6:
                     try:
                         key = int(input(
-                            "1.Add car 2.Change car status 3.Remove car 4.View all cars 5.View car by Registration number 6.Logout \n"))
+                            "1.Add car 2.Change car status 3.Remove car 4.View all cars 5.View car by Registration number 6.Logout 7.Run Available Maker \n"))
                     except:
                         print('wrong input..try again!!')
 
@@ -229,6 +244,8 @@ if __name__ == "__main__":
                         admin.view_car()
                     elif key == 5:
                         admin.view_car(has_reg_no=True)
+                    elif key == 7:
+                        Available_Maker(frontdesk)
         elif choice == 2:
             customer = Customer(frontdesk)
             while True:
