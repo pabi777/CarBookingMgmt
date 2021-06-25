@@ -14,5 +14,6 @@
 6. Login to customer's end
 7. Customer can view available cars, can book cars, can see booked car.
 8. Expires when duration ends
+9. Thread implemented to make the cars Available again
 
 Adding more......
