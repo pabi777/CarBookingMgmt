@@ -7,115 +7,151 @@ will be displayed.
 
 
 '''
-
+import os
 import pprint
-
 pp = pprint.PrettyPrinter(indent=4)
-car_dict = {}
 
 
-class Customer:
+class Frontdesk:
+    def __init__(self) -> None:
+        self.added_car = False
+        self.car_dict = {}
+
+
+class Customer(Frontdesk):
     username = None
+    phone = None
 
-# Assuming passkey is shared only among managers
+    def __init__(self) -> None:
+        Frontdesk.__init__(self)
+
+    def bookcar(self):
+        print(self.added_car, self.car_dict)
+
+# Note: Assuming passkey is shared only among managers
 
 
-class Manager:
-    username, passkey = None, '1234'
+class Manager():
+    username, passkey = None, str(os.getenv('secret', 'secret'))
 
 
-class Admin:
-    def is_manager(self, IAM):
-        return True if isinstance(IAM, Manager) else False
+class Admin(Frontdesk):
 
-    def add_car(self, IAM):
-        if not self.is_manager(IAM):
-            return 'Unauthorized'
+    def __init__(self, IAM):
+        self.IAM = IAM
+        Frontdesk.__init__(self)
 
+    def is_manager(func):
+        def inner(self, **kwargs):
+            if isinstance(self.IAM, Manager):
+                func(self, **kwargs)
+            else:
+                print('Unauthorized Access')
+        return inner
+
+    @is_manager
+    def add_car(self):
         key = None
-        i = 1
+        i = 1000
+        start = i
         while key != 'q':
             # Automatically generating registrarion number
-            car_dict.update(
+            self.car_dict.update(
                 {
-                    i: {
-                        'regnumber': i,
-                        'name': f"CAR {i}",
+                    f'WB {i}': {
+                        'regnumber': f'WB {i}',
+                        'name': f"CAR {(i-start)+1}",
                         # 2 hours rent time
                         'duration': 2,
                         'status': 'AVAILABLE'
                     }
                 })
 
-            print(f'car{i} added')
+            print(f'CAR {(i-start)+1} added')
             i += 1
-            key = str(input('Press q to stop adding or any key to continue\n'))
+            self.added_car = True
+            key = str(
+                input('Press q to stop adding or press Enter to add More car\n')).lower()
 
-    def status_change(self, IAM):
-        if not self.is_manager(IAM):
-            return 'Unauthorized'
-        self.view_car(IAM)
-        reg = int(input('Enter Car registrarion number to update status:'))
-        if reg not in car_dict:
-            pp.pprint('Try again..')
-        else:
-            car_dict[reg]['status'] = str(
-                input("Enter new status: Booked/Available: ")).upper()
+    @is_manager
+    def status_change(self):
+        self.view_car()
+        try:
+            reg = str(
+                input('Enter Car registrarion number to update status:')).upper()
+            if reg not in self.car_dict:
+                print('Try again..')
+            else:
+                self.car_dict[reg]['status'] = str(
+                    input("Enter new status: Booked/Available: ")).upper()
+        except:
+            print('Try again.....')
 
-    def remove_car(self, IAM):
-        if not self.is_manager(IAM):
-            return 'Unauthorized'
-        self.view_car(IAM)
-        reg = int(input('Enter Car registrarion number to remove: '))
-        if reg not in car_dict:
-            pp.pprint('Try again..')
-        else:
-            print("Removed car id: ", car_dict.pop(reg))
+    @is_manager
+    def remove_car(self):
+        self.view_car()
+        try:
+            reg = str(input('Enter Car registrarion number to remove: ')).upper()
+            if reg not in self.car_dict:
+                print('Try again..')
+            else:
+                print("Removed car id: ", self.car_dict.pop(reg))
+        except:
+            print('Try again....')
 
-    def view_car(self, IAM, reg_id=None):
-        if not self.is_manager(IAM):
-            return 'Unauthorized'
-        if reg_id:
+    @is_manager
+    def view_car(self, has_reg_no=False):
+        if has_reg_no:
             try:
-                pp.pprint(car_dict[int(reg_id)])
+                reg_id = str(input('enter your reg number:')).upper()
+                pp.pprint(self.car_dict[int(reg_id)])
             except KeyError:
-                pp.pprint('No car found corrosponding resgistration number')
+                print('No car found corrosponding resgistration number\n')
+            except:
+                print("Try again\n")
         else:
-            pp.pprint(car_dict)
-
-
-class Booking:
-    customer = Customer()
-    pp.pprint(isinstance(customer, Customer))
+            pp.pprint(self.car_dict)
 
 
 if __name__ == "__main__":
-    #
-    choice = int(input("1.Manager login 2.User Login\n"))
-    if choice == 1:
-        manager = Manager()
-        manager.username = str(input('Enter username: '))
-        passwd = str(input('Enter manager passkey: '))
-        loggedin = False
-        if passwd == manager.passkey:
-            pp.pprint('Login successfull')
-            loggedin = True
-        else:
-            pp.pprint("wrong password, Exiting.......")
-        if loggedin:
-            key = None
-            admin = Admin()
-            while key != 6:
-                key = int(input(
-                    "1.Add car 2.Change car status 3.Remove car 4.View all cars 5.View car by Registration number 6.exit\n"))
-                if key == 1:
-                    admin.add_car(manager)
-                elif key == 2:
-                    admin.status_change(manager)
-                elif key == 3:
-                    admin.remove_car(manager)
-                elif key == 4:
-                    admin.view_car(manager)
-                elif key == 5:
-                    reg = int(input('enter your reg number:'))
-                    admin.view_car(manager, reg)
+
+    while True:
+        try:
+            choice = int(input("1.Manager login 2.User Login 3.Exit\n"))
+        except:
+            choice = None
+        if choice == 1:
+            manager = Manager()
+            manager.username = str(input('Enter username: '))
+            passwd = str(input('Enter manager passkey: '))
+            loggedin = False
+            if passwd == manager.passkey:
+                print('Login successfull')
+                loggedin = True
+            else:
+                print("\nwrong password, Try again.......\n")
+            if loggedin:
+                key = None
+                admin = Admin(manager)
+                while key != 6:
+                    try:
+                        key = int(input(
+                            "1.Add car 2.Change car status 3.Remove car 4.View all cars 5.View car by Registration number 6.Login menu \n"))
+                    except:
+                        print('wrong input..try again!!')
+
+                    if key == 1:
+                        admin.add_car()
+                    elif key == 2:
+                        admin.status_change()
+                    elif key == 3:
+                        admin.remove_car()
+                    elif key == 4:
+                        admin.view_car()
+                    elif key == 5:
+                        admin.view_car(has_reg_no=True)
+        elif choice == 2:
+            customer = Customer()
+            customer.bookcar()
+        elif choice == 3:
+            break
