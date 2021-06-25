@@ -23,18 +23,12 @@ class B():
         a = 1
 
 
-class Y():
-    def get(self):
-        c = C()
-        a = A(c)
-        b = B(c)
+c = C()
+a = A(c)
+b = B(c)
 
-        print(c.a)
-        a.fn1()
-        print(c.a)
-        b.fn1()
-        print(c.a)
-
-
-y = Y()
-y.get()
+print(c.a)
+a.fn1()
+print(c.a)
+b.fn1()
+print(c.a)
