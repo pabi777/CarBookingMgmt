@@ -1,5 +1,4 @@
-# assignment
-assignment
+# Assignment
 
 run python3 car.py
 1. create Virtual enviourment (optional) and export export secret=1234 time_duration=1
