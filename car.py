@@ -67,14 +67,18 @@ class Customer(Available_Maker):
         self.frontdesk = frontdesk
         self.username = str(input('Enter name: '))
         self.phone = str(input('Phone: '))
+        if not self.username or (not len(self.phone)==10):
+            print("invalid details...please provide valid username and phone number. Length of the phonenumber must be 10")
+            self.__init__(frontdesk)
         super().__init__(frontdesk)
 
     def is_any_car_available(func):
         def inner(self, **kwargs):
-            if self.frontdesk.added_car:
+            if self.frontdesk.car_dict:
                 # if isinstance(self.IAM, Customer):
                 func(self, **kwargs)
             else:
+                print('No cars available in stock right now!!')
                 return('No cars available in stock right now!!')
         return inner
 
@@ -86,7 +90,7 @@ class Customer(Available_Maker):
                 self.frontdesk.car_dict[x] for x in self.frontdesk.car_dict if self.frontdesk.car_dict[x]['status'] == f'AVAILABLE']
             car_count = len(cars)
             pp.pprint(self.frontdesk.list_formatter(cars))
-            print(f'\n{car_count} car available \n')
+            print(f'\n{car_count} Car available \n')
 
     @is_any_car_available
     def request_car(self):
@@ -95,7 +99,7 @@ class Customer(Available_Maker):
             if self.frontdesk.car_dict[car]['status'] == 'AVAILABLE' or self.frontdesk.car_dict[car]['duration'] < datetime.now():
                 self.show_car()
                 ch = str(
-                    input(f'Cars available.Do you want to book car? y/n: ')).lower()
+                    input('Do you want to book car? y/n: ')).lower()
                 if ch == 'n':
                     is_available = True
                     break
@@ -182,7 +186,7 @@ class Admin(Available_Maker):
             if reg not in self.frontdesk.car_dict:
                 print('Try again..')
             else:
-                print("Removed car id: ", self.frontdesk.single_formatter(
+                print("Removed car details: ", self.frontdesk.single_formatter(
                     self.frontdesk.car_dict.pop(reg)))
         except:
             print('Try again....')
@@ -192,7 +196,7 @@ class Admin(Available_Maker):
         self.checker()
         if has_reg_no:
             try:
-                reg_id = str(input('enter your reg number:')).upper()
+                reg_id = str(input('Enter reg number:')).upper()
                 pp.pprint(self.frontdesk.single_formatter(
                     self.frontdesk.car_dict[reg_id]))
             except KeyError:
@@ -213,14 +217,18 @@ if __name__ == "__main__":
             choice = None
         if choice == 1:
             manager = Manager()
-            manager.username = str(input('Enter username: '))
+            username = str(input('Enter username: '))
+            if not username:
+                print('Please provide a username\n')
+                continue
+            manager.username = username
             passwd = str(input('Enter manager passkey: '))
             loggedin = False
             if passwd == manager.passkey:
                 print('Login successfull')
                 loggedin = True
             else:
-                print("\nwrong password, Try again.......\n")
+                print("\nWrong password, Try again.......\n")
             if loggedin:
                 key = None
                 admin = Admin(manager, frontdesk)
@@ -229,7 +237,7 @@ if __name__ == "__main__":
                         key = int(input(
                             "1.Add car 2.Change car status 3.Remove car 4.View all cars 5.View car by Registration number 6.Logout \n"))
                     except:
-                        print('wrong input..try again!!')
+                        print('Wrong input..try again!!')
 
                     if key == 1:
                         admin.add_car()
