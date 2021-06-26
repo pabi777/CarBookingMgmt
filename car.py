@@ -22,41 +22,52 @@ class Frontdesk:
     def formatter(self, cardict):
         if cardict:
             temp = deepcopy(cardict)
+            print(cardict)
             for item in temp:
-                temp[item]['duration'] = temp[item]['duration'].strftime(
-                    '%d-%m-%Y %H:%M:%S')
+                if temp[item]['duration']:
+                    temp[item]['duration'] = temp[item]['duration'].strftime(
+                        '%d-%m-%Y %H:%M:%S')
             return temp
         else:
             return cardict
 
     def single_formatter(self, item1):
         item = item1.copy()
-        item['duration'] = item['duration'].strftime(
-            '%d-%m-%Y %H:%M:%S')
+        if item['duration']:
+            item['duration'] = item['duration'].strftime(
+                '%d-%m-%Y %H:%M:%S')
         return item
 
     def list_formatter(self, item1):
         item = deepcopy(item1)
         for i in item:
-            i['duration'] = i['duration'].strftime(
-                '%d-%m-%Y %H:%M:%S')
+            if i['duration']:
+                i['duration'] = i['duration'].strftime(
+                    '%d-%m-%Y %H:%M:%S')
         return item
 
 
-class Customer():
+class Available_Maker:
+
+    def __init__(self, frontdesk) -> None:
+        self.frontdesk = frontdesk
+
+    def checker(self):
+        if self.frontdesk.added_car:
+            for item in self.frontdesk.car_dict:
+                if self.frontdesk.car_dict[item]['duration']:
+                    if self.frontdesk.car_dict[item]['duration'] < datetime.now():
+                        self.frontdesk.car_dict[item]['status'] = 'AVAILABLE'
+                        self.frontdesk.car_dict[item]['duration'] = ''
+
+
+class Customer(Available_Maker):
 
     def __init__(self, frontdesk) -> None:
         self.frontdesk = frontdesk
         self.username = str(input('Enter name: '))
         self.phone = str(input('Phone: '))
-
-    def is_customer(func):
-        def inner(self, **kwargs):
-            if isinstance(self, Customer):
-                func(self, **kwargs)
-            else:
-                print('Unauthorized Access')
-        return inner
+        super().__init__(frontdesk)
 
     def is_any_car_available(func):
         def inner(self, **kwargs):
@@ -68,9 +79,9 @@ class Customer():
         return inner
 
     @is_any_car_available
-    @is_customer
     def show_car(self):
         if self.frontdesk.added_car:
+            self.checker()
             cars = [
                 self.frontdesk.car_dict[x] for x in self.frontdesk.car_dict if self.frontdesk.car_dict[x]['status'] == f'AVAILABLE']
             car_count = len(cars)
@@ -78,7 +89,6 @@ class Customer():
             print(f'\n{car_count} car available \n')
 
     @is_any_car_available
-    @is_customer
     def request_car(self):
         is_available = True
         for i, car in enumerate(self.frontdesk.car_dict):
@@ -98,8 +108,8 @@ class Customer():
         if not is_available:
             print('Sorry! no car can be booked at this time..check again later')
 
-    @is_customer
     def booked_cars(self):
+        self.checker()
         carlist = [self.frontdesk.car_dict[x]
                    for x in self.frontdesk.car_dict if self.frontdesk.car_dict[x]['status'] == f'BOOKED to {self.username}']
         print(self.frontdesk.list_formatter(carlist))
@@ -111,11 +121,12 @@ class Manager():
     username, passkey = None, str(os.getenv('secret', 'secret'))
 
 
-class Admin():
+class Admin(Available_Maker):
 
     def __init__(self, IAM, frontdesk):
         self.IAM = IAM
         self.frontdesk = frontdesk
+        super().__init__(frontdesk)
 
     def is_manager(func):
         def inner(self, **kwargs):
@@ -138,7 +149,7 @@ class Admin():
                         'regnumber': f'WB {i}',
                         'name': f"CAR {(i-start)+1}",
                         # 2 hours rent time
-                        'duration': datetime.now(),
+                        'duration': '',
                         'status': 'AVAILABLE'
                     }
                 })
@@ -178,6 +189,7 @@ class Admin():
 
     @ is_manager
     def view_car(self, has_reg_no=False):
+        self.checker()
         if has_reg_no:
             try:
                 reg_id = str(input('enter your reg number:')).upper()

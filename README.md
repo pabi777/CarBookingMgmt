@@ -13,6 +13,6 @@
 5. Logout from manager's end
 6. Login to customer's end
 7. Customer can view available cars, can book cars, can see booked car.
-8. Expires when duration ends
+8. Booking Expires when duration ends automatically
 
 Adding more......
