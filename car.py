@@ -198,7 +198,7 @@ class Admin(Available_Maker):
             except KeyError:
                 print('No car found corrosponding resgistration number\n')
             except:
-                raise
+                # raise
                 print("Try again\n")
         else:
             pp.pprint(self.frontdesk.formatter(self.frontdesk.car_dict))
