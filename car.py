@@ -183,7 +183,7 @@ class Admin(Available_Maker):
             self.garage.last_car_number += 1
             self.garage.added_car = True
             key = str(
-                input('Press q to stop adding or press Enter to add More car\n')).lower()
+                input('Press q to stop adding or press Enter to add More car \n')).lower()
 
     @ is_manager
     def status_change(self):
