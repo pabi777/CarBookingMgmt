@@ -1,0 +1,4 @@
+WARNING:root:customer entered wrong choice(non-integer) in menu outer choice
+WARNING:root:2021-06-30 22:12:36.035825 : invalid literal for int() with base 10: 'x' : customer entered wrong choice(non-integer) in menu outer choice
+WARNING:root:2021-06-30 22:12:49.715705 : invalid literal for int() with base 10: 'r' : customer entered wrong choice(non-integer) in menu outer choice
+DEBUG:root:2021-06-30 22:13:43.826297 :  : class: Admin, Function: view_car if has_reg_no's general exception section

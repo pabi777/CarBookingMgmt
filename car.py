@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 import os
 import pprint
 from copy import deepcopy
+import logging
+logging.basicConfig(filename='car_debug.log', level=logging.DEBUG)
+
 pp = pprint.PrettyPrinter(indent=4)
 
 
@@ -213,9 +216,11 @@ class Admin(Available_Maker):
                 pp.pprint(self.garage.single_formatter(
                     self.garage.car_dict[reg_id]))
             except KeyError:
+
                 print('No car found corrosponding resgistration number\n')
-            except:
-                # raise
+            except Exception as e:
+                logging.debug(
+                    f"{datetime.now()} : {e} : class: Admin, Function: view_car if has_reg_no's general exception section")
                 print("Try again\n")
         else:
             pp.pprint(self.garage.formatter(self.garage.car_dict))
@@ -269,7 +274,9 @@ if __name__ == "__main__":
                 try:
                     cust_choice = int(
                         input("1.Show availabe car 2.Book car 3.Show booked car 4.Exit\n"))
-                except:
+                except Exception as e:
+                    logging.warning(
+                        f"{datetime.now()} : {e} : customer entered wrong choice(non-integer) in menu outer choice")
                     cust_choice = None
 
                 msg = ''
