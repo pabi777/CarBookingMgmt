@@ -8,19 +8,20 @@ which will be reserved if the car is available fre in the workshop else appropri
 will be displayed.
 '''
 
+from random import randint
 from datetime import datetime, timedelta
 import os
 import pprint
 from copy import deepcopy
 import logging
 logging.basicConfig(filename='car_debug.log', level=logging.DEBUG)
-
 pp = pprint.PrettyPrinter(indent=4)
 
 
 class Garage:
     added_car = False
     car_dict = {}
+    last_car_number = 1000
 
     def formatter(self, cardict):
         if cardict:
@@ -158,8 +159,11 @@ class Admin(Available_Maker):
 
     @ is_manager
     def add_car(self):
+        car_names = ['Lamborghini Diablo', 'Ford Raptor', 'Ferrari Testarossa', 'Porsche 911 Carrera',
+                     'Jensen Interceptor', 'Lamborghini Huracán', 'Ferrari 812 Superfast', 'Jeep Gladiator']
+        car_count = len(car_names)-1
         key = None
-        i = 1000
+        i = self.garage.last_car_number
         start = i
         while key != 'q':
             # Automatically generating registrarion number
@@ -167,15 +171,16 @@ class Admin(Available_Maker):
                 {
                     f'WB {i}': {
                         'regnumber': f'WB {i}',
-                        'name': f"CAR {(i-start)+1}",
+                        'name': car_names[randint(0, car_count)],
                         # 2 hours rent time
                         'duration': '',
                         'status': 'AVAILABLE'
                     }
                 })
 
-            print(f'CAR {(i-start)+1} added')
+            print(f'{(i-start)+1} CARS added')
             i += 1
+            self.garage.last_car_number += 1
             self.garage.added_car = True
             key = str(
                 input('Press q to stop adding or press Enter to add More car\n')).lower()
